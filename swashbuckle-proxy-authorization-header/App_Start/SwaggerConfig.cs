@@ -24,8 +24,6 @@ namespace swashbuckle_proxy_authorization_header
                     c.SingleApiVersion("v1", "swashbuckle_proxy_authorization_header");
                     c.IncludeXmlComments($"{AppDomain.CurrentDomain.BaseDirectory}\\bin\\swashbuckle-proxy-authorization-header.xml");
                     c.OperationFilter<ProxyAuthorizationHeaderOperationFilter>();
-
-                    //c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
                 })
                 .EnableSwaggerUi();
         }
