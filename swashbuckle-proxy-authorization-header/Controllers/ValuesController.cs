@@ -1,5 +1,10 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Web.Http;
+using System.Web.Http.Results;
+using Newtonsoft.Json;
 using swashbuckle_proxy_authorization_header.Filters;
 using Swashbuckle.Swagger.Annotations;
 
@@ -21,10 +26,24 @@ namespace swashbuckle_proxy_authorization_header.Controllers
         [SwaggerOperation("GetById")]
         [SwaggerResponse(HttpStatusCode.OK)]
         [SwaggerResponse(HttpStatusCode.NotFound)]
-        [ProxyAuthorizationFilter]
-        public string Get(int id)
+        //[ProxyAuthorizationFilter]
+        public IHttpActionResult Get(int id)
         {
-            return $"value {id}";
+            var request = new ControllerRequest
+            {
+                Body = Request.Content.ReadAsStringAsync().Result,
+                Headers = Request.Headers
+                    .Select(header => 
+                        new Tuple<string, List<string>>(header.Key, header.Value.ToList())).ToList()
+            };
+
+            return Json(request);
         }
+    }
+
+    internal class ControllerRequest
+    {
+        public List<Tuple<string, List<string>>> Headers;
+        public string Body;
     }
 }
