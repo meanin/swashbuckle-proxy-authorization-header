@@ -16,24 +16,46 @@ namespace swashbuckle_proxy_authorization_header.Controllers
     public class ValuesController : ApiController
     {
         /// <summary>
-        /// Get by id method
+        /// Get request
         /// </summary>
-        /// <remarks>
-        /// Get string "value {id:int}" by called id
-        /// </remarks>
-        /// <param name="id">get id to return</param>
+        /// Get request values
         /// <returns>value with id</returns>
-        [SwaggerOperation("GetById")]
         [SwaggerResponse(HttpStatusCode.OK)]
-        [SwaggerResponse(HttpStatusCode.NotFound)]
-        //[ProxyAuthorizationFilter]
-        public IHttpActionResult Get(int id)
+        [SwaggerResponse(HttpStatusCode.Unauthorized)]
+        [ProxyAuthorizationFilter]
+        [Route("api/Values/GetRequest")]
+        public IHttpActionResult GetRequest()
         {
             var request = new ControllerRequest
             {
                 Body = Request.Content.ReadAsStringAsync().Result,
                 Headers = Request.Headers
                     .Select(header => 
+                        new Tuple<string, List<string>>(header.Key, header.Value.ToList())).ToList()
+            };
+
+            return Json(request);
+        }
+
+        /// <summary>
+        /// Get request
+        /// </summary>
+        /// Get request values
+        /// <returns>value with id</returns>
+        [SwaggerResponse(HttpStatusCode.OK)]
+        [SwaggerResponse(HttpStatusCode.Unauthorized)]
+#if DEBUG
+        [OverwriteProxyAuthorizationFilter]
+#endif
+        [ProxyAuthorizationFilter]
+        [Route("api/Values/GetRequestWithBypassedProxyAuthorizationHeader")]
+        public IHttpActionResult GetRequestWithBypassedProxyAuthorizationHeader()
+        {
+            var request = new ControllerRequest
+            {
+                Body = Request.Content.ReadAsStringAsync().Result,
+                Headers = Request.Headers
+                    .Select(header =>
                         new Tuple<string, List<string>>(header.Key, header.Value.ToList())).ToList()
             };
 

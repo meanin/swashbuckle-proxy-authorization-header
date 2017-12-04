@@ -1,12 +1,9 @@
-﻿using System.Linq;
-using System.Web.Http;
-using System.Web.Http.Description;
+﻿using System.Web.Http;
 using Swashbuckle.Application;
-using Swashbuckle.Swagger;
 using WebActivatorEx;
 using swashbuckle_proxy_authorization_header;
-using System.Collections.Generic;
 using System;
+using swashbuckle_proxy_authorization_header.Filters;
 
 [assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
@@ -23,33 +20,12 @@ namespace swashbuckle_proxy_authorization_header
                 {
                     c.SingleApiVersion("v1", "swashbuckle_proxy_authorization_header");
                     c.IncludeXmlComments($"{AppDomain.CurrentDomain.BaseDirectory}\\bin\\swashbuckle-proxy-authorization-header.xml");
-                    c.OperationFilter<ProxyAuthorizationHeaderOperationFilter>();
+#if DEBUG
+                    c.OperationFilter(() => new CustomHeaderOperationFilter("ProxyAuthorization"));
+                    c.OperationFilter(() => new CustomHeaderOperationFilter("Proxy-Authorization"));
+#endif
                 })
                 .EnableSwaggerUi();
         }
     }
-
-    internal class ProxyAuthorizationHeaderOperationFilter : IOperationFilter
-    {
-        private static string Name = "Proxy-Authorization";
-
-        public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
-        {
-            if (operation.parameters == null)
-                operation.parameters = new List<Parameter>();
-
-            if (operation.parameters.All(p => p.name != Name))
-            {
-                operation.parameters.Add(new Parameter
-                {
-                    name = Name,
-                    @in = "header",
-                    description = $"{Name} header",
-                    required = true,
-                    type = "string"
-                });
-            }
-        }
-    }
-
 }
